@@ -17,21 +17,22 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
         }
     }
 
-    static List<Tuple> getMetaDependencyDependencies(GradleMetaDependency dependency, List repositories) {
+    static List<Tuple> getMetaDependencyDependencies(GradleMetaDependency dependency, List<GradleMetaRepository> repositories) {
 
         def repo = repositories.stream()
-                .map({
-            return it.toString() + "/" + dependency.identifier.toString() + "/" + dependency.version.toString()
-        }).
-                filter({
-                    repoHasMetaDependency((String)it)
-                }).findFirst().get()
+            .map({
+                return it.location.toString() + "/" + dependency.identifier + "/" + dependency.version
+            }).
+            filter({
+                repoHasMetaDependency(it.toString())
+            }).findFirst()
 
-        if(repo == null)
+        if(!repo.isPresent())
             throw new NoMetaDependencyFoundException("${dependency.identifier} was not found.")
+
         def results = new ArrayList()
 
-        new URL((String)repo).eachLine {
+        repo.toURL.eachLine {
             if (!it.startsWith("//")){
                 def line = it.replaceAll("\"|\'", "").split(" ")
                 results.add( new Tuple(line[0], line[1]))
@@ -45,7 +46,7 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
     static Boolean repoHasMetaDependency(String url){
         try {
             HttpURLConnection.setFollowRedirects(false)
-            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection()
+            HttpURLConnection con = (HttpURLConnection) url.toURL().openConnection()
             con.setRequestMethod("HEAD")
             return (con.getResponseCode() == HttpURLConnection.HTTP_OK)
         } catch (Exception ignored){
@@ -57,7 +58,7 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
 
 class GradleMetaDependency{
     final String identifier
-    final String version = "latest"
+    String version = "latest"
 
     GradleMetaDependency(String name) {
         this.identifier = name
