@@ -3,6 +3,7 @@ package com.github.sirlag
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+
 class GradleMetaPackagesPlugin implements Plugin<Project> {
     void apply(Project project){
         def metaDependencies = project.container(GradleMetaDependency)
@@ -17,30 +18,32 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
         }
     }
 
-    static List<Tuple> getMetaDependencyDependencies(GradleMetaDependency dependency, List<GradleMetaRepository> repositories) {
+    static List<Tuple> getMetaDependencyDependencies(GradleMetaDependency metaDependency, List<GradleMetaRepository> repositories) {
 
-        def repo = repositories.stream()
+        def optionalRepo = repositories.stream()
             .map({
-                return it.location.toString() + "/" + dependency.identifier + "/" + dependency.version
+                return it.location.toString() + "/" + metaDependency.identifier + "/" + metaDependency.version
             }).
             filter({
                 repoHasMetaDependency(it.toString())
             }).findFirst()
 
-        if(!repo.isPresent())
-            throw new NoMetaDependencyFoundException("${dependency.identifier} was not found.")
+        if(!optionalRepo.isPresent())
+            throw new NoMetaDependencyFoundException("${metaDependency.identifier} was not found.")
+
+        def repo = optionalRepo.get()
 
         def results = new ArrayList()
 
-        repo.toURL.eachLine {
-            if (!it.startsWith("//")){
-                def line = it.replaceAll("\"|\'", "").split(" ")
-                results.add( new Tuple(line[0], line[1]))
-            }
+        repo.toURL().eachLine {
+            def dependency = readMetaLine(it)
+            if (dependency!=null)
+                results.add(dependency)
+            else
+                null
         }
 
-        results
-
+        return results
     }
 
     static Boolean repoHasMetaDependency(String url){
@@ -52,6 +55,13 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
         } catch (Exception ignored){
             return false
         }
+    }
+
+    static String[] readMetaLine(String line){
+        if (!line.startsWith("//")){
+            return line.replaceAll("\"|\'", "").split(" ")
+        }
+        return null
     }
 
 }

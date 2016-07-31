@@ -36,4 +36,23 @@ class GradleMetaPackagesPluginTest {
     public void repoHasMetaDependencyTestFalse(){
         assertFalse(GradleMetaPackagesPlugin.repoHasMetaDependency("http://sirlag.me/fakepackage/9001.69"))
     }
+
+    @Test
+    public void readMetaLineTestComment(){
+        assert(GradleMetaPackagesPlugin.readMetaLine("//This is a comment, it can be ignored") == null)
+    }
+
+    @Test
+    public void readMetaLineTestCorrect(){
+        def splitString = GradleMetaPackagesPlugin.readMetaLine("compile com.github.sirlag:GradleMetaPackagesPlugin:1.0")
+        assert(splitString[0] == "compile")
+        assert(splitString[1] == "com.github.sirlag:GradleMetaPackagesPlugin:1.0")
+    }
+
+    @Test
+    public void readMetaLineTestWithQoutes(){
+        def splitString = GradleMetaPackagesPlugin.readMetaLine("compile \"com.github.sirlag:GradleMetaPackagesPlugin:1.0\'")
+        assert(splitString[0] == "compile")
+        assert(splitString[1] == "com.github.sirlag:GradleMetaPackagesPlugin:1.0")
+    }
 }
