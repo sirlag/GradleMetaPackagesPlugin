@@ -3,13 +3,12 @@ package com.github.sirlag
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-
 class GradleMetaPackagesPlugin implements Plugin<Project> {
     void apply(Project project){
-        def metaDependencies = project.container(GradleMetaDependency)
-        project.extensions.metaDependencies = metaDependencies
-        def metaRepositories = project.container(GradleMetaRepository)
-        project.extensions.metaRepositories = metaRepositories
+        def metaDependenciesContainer = project.container(GradleMetaDependency)
+        project.extensions.add("metaDependencies", metaDependenciesContainer)
+        def metaRepositoriesContainer = project.container(GradleMetaRepository)
+        project.extensions.add("metaRepositories", metaRepositoriesContainer)
         project.task("metaDependents") << {
             for(metaDependency in project.extensions.metaDependencies.toList()){
                 def dependencies = getMetaDependencyDependencies(metaDependency, project.extensions.metaRepositories.toList())
