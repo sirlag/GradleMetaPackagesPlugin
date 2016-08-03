@@ -10,13 +10,6 @@ import static org.junit.Assert.*
 
 class GradleMetaPackagesPluginTest {
     @Test
-    public void gradleMetaPackagesAddsMetaDependantsTaskToProject(){
-        Project project = ProjectBuilder.builder().build()
-        project.pluginManager.apply('com.github.sirlag.GradleMetaPackages')
-        assertTrue(project.tasks.metaDependents instanceof Task)
-    }
-
-    @Test
     public void gradleMetaPackagesAddonDependenciesAreAddedToProjectTest(){
         Project project = ProjectBuilder.builder().build()
         project.pluginManager.apply('java')
@@ -45,11 +38,6 @@ class GradleMetaPackagesPluginTest {
     @Test
     public void repoHasMetaDependencyTestFalse(){
         assertFalse(GradleMetaPackagesPlugin.repoHasMetaDependency("http://sirlag.me/fakepackage/9001.69"))
-    }
-
-    @Test
-    public void readMetaLineTestComment(){
-        assert(GradleMetaPackagesPlugin.readMetaLine("//This is a comment, it can be ignored") == null)
     }
 
     @Test
