@@ -12,7 +12,7 @@ class GradleMetaPackagesPlugin implements Plugin<Project> {
         project.task("metaDependents") << {
             for(metaDependency in project.extensions.metaDependencies.toList()){
                 def dependencies = getMetaDependencyDependencies(metaDependency, project.extensions.metaRepositories.toList())
-                dependencies.forEach({project.dependencies.add((String)it[0], it[1])})
+                dependencies.forEach{project.dependencies.add((String)it[0], it[1])}
             }
         }
     }

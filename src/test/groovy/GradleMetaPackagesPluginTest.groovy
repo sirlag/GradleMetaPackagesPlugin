@@ -16,6 +16,16 @@ class GradleMetaPackagesPluginTest {
         assertTrue(project.tasks.metaDependents instanceof Task)
     }
 
+    @Test
+    public void gradleMetaPackagesAddonDependenciesAreAddedToProjectTest(){
+        Project project = ProjectBuilder.builder().build()
+        project.pluginManager.apply('java')
+        project.pluginManager.apply('com.github.sirlag.GradleMetaPackages')
+
+        project.dependencies.add("compile", "super:fake:dependency")
+        project.configurations.getByName("compile").allDependencies.each {print it}
+    }
+
     @Test(expected = NoMetaDependencyFoundException.class)
     public void getMetaDependencyDependenciesTest() throws Exception {
         def fakeDependency = new GradleMetaDependency("fakeDependency")
